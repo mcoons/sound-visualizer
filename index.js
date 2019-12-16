@@ -246,7 +246,7 @@ window.onload = function () {
     // audioEle.src = './assets/sounds/Riders on the Storm.mp3'; 
 
     audioEle.preload = 'auto';
-    audioEle.autoplay = true;
+    audioEle.autoplay = false;
     audioEle.loop = true;
     var audioSourceNode = audioCtx.createMediaElementSource(audioEle);
 
