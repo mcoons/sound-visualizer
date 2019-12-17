@@ -59,8 +59,6 @@ window.onload = function () {
     });
   }
 
-
-
   //////////////////////////////////////////////////////////////
   //   Scene Updating
   //////////////////////////////////////////////////////////////
@@ -78,7 +76,7 @@ window.onload = function () {
     // update sound wave data points
     tdPoints.forEach((point, index) => {
       point.y = -10 + soundData.tdBuffer[index] * 7;
-      tdPointColors[index] = palette[Math.round(map(Math.abs(soundData.tdBuffer[index]), 0, 1, 0, 1200))].color;
+      tdPointColors[index] = palette[Math.round(map(Math.abs(soundData.tdBuffer[index]), 0, 1, 500, 0))].color;
     });
     // update the sound wave object with the data points
     tdSoundWave = BABYLON.MeshBuilder.CreateLines("tdSoundWave", {
@@ -146,7 +144,7 @@ window.onload = function () {
     tdPointColors = Array(512).fill(palette[100].color);
 
     // Parameters: camera, alpha(x), beta(y), radius, target position, scene
-    let camera1 = new BABYLON.ArcRotateCamera("camera1", 3 * Math.PI / 2, Math.PI / 3, 95, new BABYLON.Vector3(0, 0, 0), scene);
+    let camera1 = new BABYLON.ArcRotateCamera("camera1", 3 * Math.PI / 2, Math.PI / 3, 95, new BABYLON.Vector3(0, 10, 64), scene);
 
     // Attach controls to cameras
     camera1.attachControl(canvas, true);
@@ -221,38 +219,38 @@ window.onload = function () {
     let boxMaterial = new BABYLON.StandardMaterial("material01", scene);
     boxMaterial.ambientColor = new BABYLON.Color3(0.4, 0.4, 0.4);
 
-    let box = BABYLON.MeshBuilder.CreateBox(("box"), {
+    let boxBody = BABYLON.MeshBuilder.CreateBox(("box"), {
       width: 128,
       depth: 128,
       height: 20
     }, scene);
-    box.position = new BABYLON.Vector3(0, -10, 64);
+    boxBody.position = new BABYLON.Vector3(0, -10, 64);
 
-    let boxl = BABYLON.MeshBuilder.CreateBox(("box"), {
+    let boxleft = BABYLON.MeshBuilder.CreateBox(("box"), {
       width: 1,
       depth: 128,
       height: 33
     }, scene);
-    boxl.position = new BABYLON.Vector3(-64.5, -3.5, 64);
+    boxleft.position = new BABYLON.Vector3(-64.5, -3.5, 64);
 
-    let boxr = BABYLON.MeshBuilder.CreateBox(("box"), {
+    let boxright = BABYLON.MeshBuilder.CreateBox(("box"), {
       width: 1,
       depth: 128,
       height: 33
     }, scene);
-    boxr.position = new BABYLON.Vector3(64.5, -3.5, 64);
+    boxright.position = new BABYLON.Vector3(64.5, -3.5, 64);
 
-    let boxb = BABYLON.MeshBuilder.CreateBox(("box"), {
+    let boxback = BABYLON.MeshBuilder.CreateBox(("box"), {
       width: 128,
       depth: 1,
       height: 33
     }, scene);
-    boxb.position = new BABYLON.Vector3(0, -3.5, 127.5);
+    boxback.position = new BABYLON.Vector3(0, -3.5, 127.5);
 
-    box.material = boxMaterial;
-    boxl.material = boxMaterial;
-    boxr.material = boxMaterial;
-    boxb.material = boxMaterial;
+    boxBody.material = boxMaterial;
+    boxleft.material = boxMaterial;
+    boxright.material = boxMaterial;
+    boxback.material = boxMaterial;
 
     let plateMaterial = new BABYLON.StandardMaterial("material01", scene);
     plateMaterial.ambientColor = new BABYLON.Color3(0.4, 0.4, 0.4);
@@ -260,27 +258,27 @@ window.onload = function () {
     plateMaterial.diffuseColor = new BABYLON.Color3(8/255,30/2554/255);
 
     let leftCyl = BABYLON.MeshBuilder.CreateCylinder(("lcyl"), {
-      diameter: 18, tessellation: 20, height: .25
+      diameter: 18, tessellation: 40, height: .25
     }, scene);
     leftCyl.position = new BABYLON.Vector3(-55, -10, 0);
     leftCyl.rotation.x = Math.PI/2;
 
     let rightCyl = BABYLON.MeshBuilder.CreateCylinder(("lcyl"), {
-      diameter: 18, tessellation: 20, height: .25
+      diameter: 18, tessellation: 40, height: .25
     }, scene);
     rightCyl.position = new BABYLON.Vector3(55, -10, 0);
     rightCyl.rotation.x = Math.PI/2;
 
-    let boxf = BABYLON.MeshBuilder.CreateBox(("box"), {
+    let boxfront = BABYLON.MeshBuilder.CreateBox(("box"), {
       width: 110,
       depth: .25,
       height: 18
     }, scene);
-    boxf.position = new BABYLON.Vector3(0, -10, 0);
+    boxfront.position = new BABYLON.Vector3(0, -10, 0);
 
     leftCyl.material = plateMaterial;
     rightCyl.material = plateMaterial;
-    boxf.material = plateMaterial;
+    boxfront.material = plateMaterial;
 
   }
 
