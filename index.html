@@ -11,23 +11,47 @@
     <!-- <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script> -->
     <!-- <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script> -->
 
-    <script src="babylon/babylon.max.js" defer></script>
+
+    <script src="jquery-1.7.2.min.js"></script>
+    <script src="jquery-ui-1.8.21.custom.min.js"></script>
+    <script src="babylon/babylon.max.js"></script>
+
     <script src="index.js" defer></script>
     <link rel="stylesheet" href="index.css" type="text/css" media="all">
 </head>
 
 <body>
     <div id="wrapper">
-        <button id="start" type='button'>Pause</button>
+        <!-- <button id="start" type='button'>Pause</button> -->
         <div id='player'>
-            <audio id="music_player" controls="controls">
-                <!-- <source src="music/sample_music.mp3" /> -->
-            </audio>
-            <!-- <input type="image" src="images/play.png" onclick="play_aud()" id="play_button">
-            <input type="image" src="images/pause.png" onclick="pause_aud()" id="play_button">
-            <input type="image" src="images/stop.png" onclick="stop_aud()" id="play_button"> -->
-            <!-- <img src="images/volume.png" id="vol_img"> -->
-            <!-- <input type="range" id="change_vol" onchange="change_vol()" step="0.05" min="0" max="1" value="1"> -->
+
+            <div class="player">
+                <div class="pl"></div>
+                <div class="title"></div>
+                <!-- <div class="artist"></div> -->
+                <!-- <div class="cover"></div> -->
+                <div class="controls">
+                    <div class="play"></div>
+                    <div class="pause"></div>
+                    <div class="rew"></div>
+                    <div class="fwd"></div>
+                </div>
+                <div class="volume"></div>
+                <div class="tracker"></div>
+            </div>
+            <ul class="playlist hidden">
+                <li audiourl="./assets/sounds/Barracuda.mp3" cover="cover1.jpg" artist="Artist 1">Barracuda.mp3</li>
+                <li audiourl="./assets/sounds/Mr Roboto.mp3" cover="cover2.jpg" artist="Artist 2">Mr Roboto.mp3</li>
+                <li audiourl="./assets/sounds/my-audio8.mp3" cover="cover3.jpg" artist="Artist 3">my-audio8.mp3</li>
+                <li audiourl="./assets/sounds/my-audio9.mp3" cover="cover4.jpg" artist="Artist 4">my-audio9.mp3</li>
+                <li audiourl="./assets/sounds/my-audio6.mp3" cover="cover5.jpg" artist="Artist 5">my-audio6.mp3</li>
+                <li audiourl="./assets/sounds/We are Young.mp3" cover="cover6.jpg" artist="Artist 6">We are Young.mp3</li>
+                <li audiourl="./assets/sounds/Life in the Fast Lane.mp3" cover="cover7.jpg" artist="Artist 7">Life in the Fast Lane.mp3</li>
+                <li audiourl="./assets/sounds/Tones-01.m4a" cover="cover7.jpg" artist="Artist 7">Tones-01.m4a</li>
+                <li audiourl="./assets/sounds/my-rec.mp3" cover="cover7.jpg" artist="Artist 8">my-rec.mp3</li>
+                <li audiourl="./assets/sounds/La Bamba.mp3" cover="cover7.jpg" artist="Artist 9">La Bamba.mp3</li>
+            </ul>
+
         </div>
     </div>
     <canvas id="canvas"></canvas>
