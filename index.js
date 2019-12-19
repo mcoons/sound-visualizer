@@ -10,7 +10,7 @@ window.onload = function () {
     // Babylon is supported
     var canvas = document.getElementById("canvas");
 
-    var arraySize = 60;
+    var arraySize = 1024;
 
     var showSpheres = true;
     var showSoundWave = true;
@@ -21,6 +21,7 @@ window.onload = function () {
 
     var palette = [];
     var frObjects = [];
+    var wfObjects = [];
     var tdPoints = [];
     var tdPointColors = [];
 
@@ -70,6 +71,7 @@ window.onload = function () {
     if (showSoundWave) updateSoundWave();
     if (show3DPlane) update3DPlane();
     if (showSpheres) updateSpheres();
+    updateWaveForm();
   }
 
   function updateSoundWave() {
@@ -96,6 +98,19 @@ window.onload = function () {
       object.material = palette[Math.round(map(soundData.frBuffer[index] < -180 ? -180 : soundData.frBuffer[index], -180, -10, 0, 1529))].mat;
     });
   }
+
+  function updateWaveForm() {
+    // update wave form objects
+    wfObjects.forEach((object, index) => {
+      // object.scaling.y = (soundData.frBuffer[index] + 140) * .2;
+      let y = (soundData.tdMaxs[index].value*15);
+      object.scaling.y = y;
+      // object.position.y = y / 2;
+      // object.material = palette[Math.round(map(soundData.tdMaxs[index].value, 0, 1, 0, 1529))].mat;
+    });
+  }
+
+
 
   function update3DPlane() {
     // update 3D plane
@@ -169,6 +184,7 @@ window.onload = function () {
     if (show3DPlane) create3DPlane();
     if (showSpheres) createSpheres();
     createBox();
+    createWaveForm();
 
 
     return scene;
@@ -204,6 +220,22 @@ window.onload = function () {
     }
   }
 
+  function createWaveForm() {
+    let width = .13;
+    let depth = .25;
+    for (let i = 0; i < arraySize; i++) {
+      let thing = BABYLON.MeshBuilder.CreateBox(("box" + i), {
+        width: width,
+        depth: depth
+      }, scene);
+      let m = Math.round(map(i,0,arraySize-1,0,1529));
+      console.log(m);
+      // thing.material = palette[m].mat;
+      thing.position = new BABYLON.Vector3(-64 + i * 128/arraySize , -30, 0);
+      wfObjects.push(thing);
+    }
+  }
+
   function create3DPlane() {
     ground = BABYLON.Mesh.CreateGround('ground1', 1, 1, frBufferLength - 1, scene, true);
     ground.material = new BABYLON.StandardMaterial("gmat", scene);
@@ -215,7 +247,7 @@ window.onload = function () {
     ground.scaling = new BABYLON.Vector3(128, 1, 128);
   }
 
-  function createBox(){
+  function createBox() {
     let boxMaterial = new BABYLON.StandardMaterial("material01", scene);
     boxMaterial.ambientColor = new BABYLON.Color3(0.4, 0.4, 0.4);
 
@@ -255,19 +287,23 @@ window.onload = function () {
     let plateMaterial = new BABYLON.StandardMaterial("material01", scene);
     plateMaterial.ambientColor = new BABYLON.Color3(0.4, 0.4, 0.4);
     plateMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-    plateMaterial.diffuseColor = new BABYLON.Color3(8/255,30/2554/255);
+    plateMaterial.diffuseColor = new BABYLON.Color3(8 / 255, 30 / 2554 / 255);
 
     let leftCyl = BABYLON.MeshBuilder.CreateCylinder(("lcyl"), {
-      diameter: 18, tessellation: 40, height: .25
+      diameter: 18,
+      tessellation: 40,
+      height: .25
     }, scene);
     leftCyl.position = new BABYLON.Vector3(-55, -10, 0);
-    leftCyl.rotation.x = Math.PI/2;
+    leftCyl.rotation.x = Math.PI / 2;
 
     let rightCyl = BABYLON.MeshBuilder.CreateCylinder(("lcyl"), {
-      diameter: 18, tessellation: 40, height: .25
+      diameter: 18,
+      tessellation: 40,
+      height: .25
     }, scene);
     rightCyl.position = new BABYLON.Vector3(55, -10, 0);
-    rightCyl.rotation.x = Math.PI/2;
+    rightCyl.rotation.x = Math.PI / 2;
 
     let boxfront = BABYLON.MeshBuilder.CreateBox(("box"), {
       width: 110,
@@ -293,12 +329,15 @@ window.onload = function () {
       spheres.push(thing1);
     }
 
-    // for (let i = 0; i <= 15; i++) {
-    //   let thing2 = BABYLON.MeshBuilder.CreateSphere("sphere" + i, { diameter: 5, tessellation: 8 }, scene);
-    //   thing2.position = new BABYLON.Vector3(i * 8 - 60, -50, 0);
-    //   thing2.material = palette[45 * 16 + i * 45].mat;
-    //   spheres.push(thing2);
-    // }
+    for (let i = 0; i <= 15; i++) {
+      let thing2 = BABYLON.MeshBuilder.CreateSphere("sphere" + i, {
+        diameter: 5,
+        tessellation: 8
+      }, scene);
+      thing2.position = new BABYLON.Vector3(i * 8 - 60, -50, 0);
+      thing2.material = palette[45 * 16 + i * 45].mat;
+      spheres.push(thing2);
+    }
   }
 
   function createPlayer() {
@@ -340,11 +379,9 @@ window.onload = function () {
     function initAudio(elem) {
       var url = elem.attr('audiourl');
       var title = elem.text();
-      // var cover = elem.attr('cover');
       var artist = elem.attr('artist');
       $('.player .title').text(title);
       $('.player .artist').text(artist);
-      // $('.player .cover').css('background-image','url(data/' + cover+')');
       audioCtx = new AudioContext();
       audioEle = new Audio(url);
       audioEle.loop = true;
@@ -431,17 +468,17 @@ window.onload = function () {
       initAudio(prev);
     });
 
-    // show playlist
-    $('.pl').click(function (e) {
-      e.preventDefault();
-      $('.playlist').fadeIn(300);
-    });
+    // // show playlist
+    // $('.pl').click(function (e) {
+    //   e.preventDefault();
+    //   $('.playlist').fadeIn(300);
+    // });
 
-    // playlist elements - click
-    $('.playlist li').click(function () {
-      stopAudio();
-      initAudio($(this));
-    });
+    // // playlist elements - click
+    // $('.playlist li').click(function () {
+    //   stopAudio();
+    //   initAudio($(this));
+    // });
 
 
   }
@@ -452,7 +489,7 @@ window.onload = function () {
 
 
   // Sets up sound devices
-  function initializeSoundDevices() {
+  function UNUSED_initializeSoundDevices() {
     var audioCtx = new AudioContext();
 
     //Create audio source
