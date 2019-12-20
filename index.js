@@ -10,16 +10,19 @@ window.onload = function () {
     // Babylon is supported
     var canvas = document.getElementById("canvas");
 
-    var arraySize = 1024;
+    var arraySize = 256;
 
     var showSpheres = true;
     var showSoundWave = true;
+    var showWaveForm = true;
     var show3DPlane = true;
     var showFreqGraph = true;
+    var showBox = true;
     var useMic = false; // TODO
     var useToneGenerator = false; // TODO
 
     var palette = [];
+    var paletteGray = [];
     var frObjects = [];
     var wfObjects = [];
     var tdPoints = [];
@@ -71,7 +74,7 @@ window.onload = function () {
     if (showSoundWave) updateSoundWave();
     if (show3DPlane) update3DPlane();
     if (showSpheres) updateSpheres();
-    updateWaveForm();
+    if (showWaveForm) updateWaveForm();
   }
 
   function updateSoundWave() {
@@ -94,7 +97,7 @@ window.onload = function () {
       // object.scaling.y = (soundData.frBuffer[index] + 140) * .2;
       let y = (soundData.frBuffer[index] + 145) * .1;
       object.scaling.y = y;
-      object.position.y = y / 2;
+      object.position.y = y / 2 +.01;
       object.material = palette[Math.round(map(soundData.frBuffer[index] < -180 ? -180 : soundData.frBuffer[index], -180, -10, 0, 1529))].mat;
     });
   }
@@ -103,14 +106,13 @@ window.onload = function () {
     // update wave form objects
     wfObjects.forEach((object, index) => {
       // object.scaling.y = (soundData.frBuffer[index] + 140) * .2;
-      let y = (soundData.tdMaxs[index].value*15);
+      let y = (soundData.tdMaxs[index].value * 12);
       object.scaling.y = y;
       // object.position.y = y / 2;
-      // object.material = palette[Math.round(map(soundData.tdMaxs[index].value, 0, 1, 0, 1529))].mat;
+      // console.log(Math.round(map(soundData.tdMaxs[index].value, 0, 1, 100, 255)))
+      object.material = paletteGray[Math.round(map(soundData.tdMaxs[index].value, 0, 1, 175, 255))].mat;
     });
   }
-
-
 
   function update3DPlane() {
     // update 3D plane
@@ -133,7 +135,7 @@ window.onload = function () {
         colorsBuffer.push(.5);
 
         // set y value of ground vertex data
-        groundVertices[vertexDataIndex + 1] = (185 - Math.abs(currentData[y])) / 10 - 4.25;
+        groundVertices[vertexDataIndex + 1] = (185 - Math.abs(currentData[y])) / 10.5 - 4.25;
 
         vertexDataIndex = vertexDataIndex + 3;
       }
@@ -155,11 +157,12 @@ window.onload = function () {
   function createScene() {
     var scene = new BABYLON.Scene(engine);
     buildPalette();
+    buildPaletteGray();
 
     tdPointColors = Array(512).fill(palette[100].color);
 
     // Parameters: camera, alpha(x), beta(y), radius, target position, scene
-    let camera1 = new BABYLON.ArcRotateCamera("camera1", 3 * Math.PI / 2, Math.PI / 3, 95, new BABYLON.Vector3(0, 10, 64), scene);
+    let camera1 = new BABYLON.ArcRotateCamera("camera1", 3 * Math.PI / 2, Math.PI / 3, 220, new BABYLON.Vector3(0, 0, 64), scene);
 
     // Attach controls to cameras
     camera1.attachControl(canvas, true);
@@ -183,8 +186,8 @@ window.onload = function () {
     if (showFreqGraph) createFreqGraph();
     if (show3DPlane) create3DPlane();
     if (showSpheres) createSpheres();
-    createBox();
-    createWaveForm();
+    if (showBox) createBox();
+    if (showWaveForm) createWaveForm();
 
 
     return scene;
@@ -215,23 +218,23 @@ window.onload = function () {
         depth: depth
       }, scene);
       thing.material = palette[i].mat;
-      thing.position = new BABYLON.Vector3(-frBufferLength * 1 / 4 + i * width + .2, 0, 0);
+      thing.position = new BABYLON.Vector3(-frBufferLength * 1 / 4 + i * width + .2, 0.01, 0.26);
       frObjects.push(thing);
     }
   }
 
   function createWaveForm() {
-    let width = .13;
-    let depth = .25;
+    let width = .50;
+    let depth = .05;
     for (let i = 0; i < arraySize; i++) {
       let thing = BABYLON.MeshBuilder.CreateBox(("box" + i), {
         width: width,
         depth: depth
       }, scene);
-      let m = Math.round(map(i,0,arraySize-1,0,1529));
-      console.log(m);
+      let m = Math.round(map(i, 0, arraySize - 1, 0, 1529));
+      // console.log(m);
       // thing.material = palette[m].mat;
-      thing.position = new BABYLON.Vector3(-64 + i * 128/arraySize , -30, 0);
+      thing.position = new BABYLON.Vector3(-64 + i * 128 / arraySize, -30, 0);
       wfObjects.push(thing);
     }
   }
@@ -242,8 +245,7 @@ window.onload = function () {
     ground.material.backFaceCulling = false;
     ground.material.specularColor = new BABYLON.Color3(0, 0, 0); // black is no shine
 
-    // ground.position.x -= .2;
-    ground.position.z = 64;
+    ground.position.z = 64.26;
     ground.scaling = new BABYLON.Vector3(128, 1, 128);
   }
 
@@ -398,17 +400,13 @@ window.onload = function () {
       // Create frequency analyser node 
       frAnalyserNode = audioCtx.createAnalyser();
       frAnalyserNode.fftSize = 512; //  power of 2 between 2^5 and 2^15,
-      frAnalyserNode.maxDecibels = -45;
-      frAnalyserNode.minDecibels = -50;
-      frAnalyserNode.smoothingTimeConstant = 0.5;
+      frAnalyserNode.smoothingTimeConstant = 0.3;
       frBufferLength = frAnalyserNode.frequencyBinCount;
       soundData.frBuffer = new Float32Array(frBufferLength);
 
       // Create time data analyser node
       tdAnalyserNode = audioCtx.createAnalyser();
       tdAnalyserNode.fftSize = 1024;
-      tdAnalyserNode.maxDecibels = -45;
-      tdAnalyserNode.minDecibels = -50;
       tdAnalyserNode.smoothingTimeConstant = 0.35;
       tdBufferLength = tdAnalyserNode.frequencyBinCount;
       soundData.tdBuffer = new Float32Array(tdBufferLength);
@@ -468,17 +466,17 @@ window.onload = function () {
       initAudio(prev);
     });
 
-    // // show playlist
-    // $('.pl').click(function (e) {
-    //   e.preventDefault();
-    //   $('.playlist').fadeIn(300);
-    // });
+    // show playlist
+    $('.pl').click(function (e) {
+      e.preventDefault();
+      $('.playlist').fadeIn(300);
+    });
 
-    // // playlist elements - click
-    // $('.playlist li').click(function () {
-    //   stopAudio();
-    //   initAudio($(this));
-    // });
+    // playlist elements - click
+    $('.playlist li').click(function () {
+      stopAudio();
+      initAudio($(this));
+    });
 
 
   }
@@ -698,12 +696,11 @@ window.onload = function () {
     let frTotalMaxs = frTotalMins = frTotalAvgs = frTotalRanges = 0;
 
     frAnalyserNode.getFloatFrequencyData(soundData.frBuffer);
-    soundData.frBufferHistory.push(soundData.frBuffer.slice(0));
-    if (soundData.frBufferHistory.length > frBufferLength) soundData.frBufferHistory.shift();
+
 
     tdAnalyserNode.getFloatTimeDomainData(soundData.tdBuffer);
-    soundData.tdBufferHistory.push(soundData.tdBuffer.slice(0));
-    if (soundData.tdBufferHistory.length > tdBufferLength) soundData.tdBufferHistory.shift();
+
+
 
     // Calculate sound wave time data min and max and get total for averaging
     //  td   {-1, 1}
@@ -718,6 +715,8 @@ window.onload = function () {
     soundData.tdTot = 0;
 
     for (let i = 0; i < tdBufferLength; i++) {
+
+
       if (soundData.tdBuffer[i] > soundData.tdMax.value) soundData.tdMax = {
         index: i,
         value: soundData.tdBuffer[i]
@@ -730,8 +729,10 @@ window.onload = function () {
 
       if (soundData.tdBuffer[i] > soundData.tdMaxAllTime) soundData.tdMaxAllTime = soundData.tdBuffer[i];
       if (soundData.tdBuffer[i] < soundData.tdMinAllTime) soundData.tdMinAllTime = soundData.tdBuffer[i];
-
     }
+
+    soundData.tdBufferHistory.push(soundData.tdBuffer.slice(0));
+    if (soundData.tdBufferHistory.length > tdBufferLength) soundData.tdBufferHistory.shift();
 
     soundData.tdMaxs.push(soundData.tdMax);
     if (soundData.tdMaxs.length > arraySize) soundData.tdMaxs.shift();
@@ -764,6 +765,9 @@ window.onload = function () {
     soundData.frTot = 0;
 
     for (let i = 0; i < frBufferLength; i++) {
+      if (soundData.frBuffer[i] < -190) {soundData.frBuffer[i] = -190}
+      if (soundData.frBuffer[i] > -10) {soundData.frBuffer[i] = -10}
+
       if (soundData.frBuffer[i] > soundData.frMax.value) soundData.frMax = {
         index: i,
         value: soundData.frBuffer[i]
@@ -777,9 +781,9 @@ window.onload = function () {
       if (soundData.frBuffer[i] > soundData.frMaxAllTime) soundData.frMaxAllTime = soundData.frBuffer[i];
       if (soundData.frBuffer[i] < soundData.frMinAllTime && soundData.frBuffer[i] > -100000) soundData.frMinAllTime = soundData.frBuffer[i];
     }
-
-    soundData.frMaxs.push(soundData.frMax);
-    if (soundData.frMaxs.length > arraySize) soundData.frMaxs.shift();
+    
+    soundData.frBufferHistory.push(soundData.frBuffer.slice(0));
+    if (soundData.frBufferHistory.length > frBufferLength) soundData.frBufferHistory.shift();
 
     soundData.frMins.push(soundData.frMin);
     if (soundData.frMins.length > arraySize) soundData.frMins.shift();
@@ -824,6 +828,33 @@ window.onload = function () {
   //////////////////////////////////////////////////////////////
   // Utility Functions
   //////////////////////////////////////////////////////////////
+
+  function buildPaletteGray() {
+
+    for (g = 0; g <= 255; g++) {
+      addToPalette(g, g, g);
+    }
+
+    function addToPalette(r, g, b) {
+
+      var color = new BABYLON.Color4(r / 255, g / 255, b / 255, 1);
+
+      let mat = new BABYLON.StandardMaterial("mat", scene);
+      mat.diffuseColor = color;
+      mat.specularColor = new BABYLON.Color3(0, 0, 0);
+      mat.ambientColor = new BABYLON.Color3(r / 255 * .4, g / 255 * .4, b / 255 * .4);
+
+      paletteGray.push({
+        r,
+        g,
+        b,
+        color,
+        mat
+      });
+    }
+    console.log(paletteGray)
+  }
+
 
   // Builds a palette array[1529] of palette objects
   function buildPalette() {
